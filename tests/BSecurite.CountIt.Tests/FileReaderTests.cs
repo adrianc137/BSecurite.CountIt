@@ -20,6 +20,14 @@ namespace BSecurite.CountIt.Tests
         }
 
         [Test]
+        public void FileReader_WhenInputFileDoesntExist_ShouldThrowException()
+        {
+            var inputFilePath = "invalidFilePath.txt";
+            Assert.That(() => _fileReader.ReadContents(inputFilePath),
+                Throws.InstanceOf<FileNotFoundException>());
+        }
+
+        [Test]
         public async Task FileReader_WhenValidInput_ShouldReadContents()
         {
             var expectedOutput = new[] { "aaa bbb ccc", "a1a1", "1111" };

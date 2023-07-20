@@ -15,7 +15,7 @@ namespace BSecurite.CountIt.Services
         {
             _fileReader = fileReader ?? throw new ArgumentNullException(nameof(fileReader));
             _wordSorter = wordSorter ?? throw new ArgumentNullException(nameof(wordSorter));
-            _wordMatcher = wordMatcher ?? throw new ArgumentNullException(nameof(wordMatcher));;
+            _wordMatcher = wordMatcher ?? throw new ArgumentNullException(nameof(wordMatcher));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -23,11 +23,6 @@ namespace BSecurite.CountIt.Services
         {
             if (string.IsNullOrWhiteSpace(inputFilePath))
                 throw new ArgumentNullException(nameof(inputFilePath));
-
-            if (!File.Exists(inputFilePath))
-            {
-                throw new ArgumentException("Provided input file path does not exist.", nameof(inputFilePath));
-            }
 
             var allWords = await BuildWordsList(inputFilePath);
 
@@ -53,16 +48,6 @@ namespace BSecurite.CountIt.Services
                 }
 
                 return wordsList;
-            }
-            catch (IOException ioEx)
-            {
-                _logger.LogError("The program failed to run due to an unexpected I/O exception.", ioEx);
-                throw;
-            }
-            catch (UnauthorizedAccessException uaEx)
-            {
-                _logger.LogError("The program failed to run due to an unauthorized access exception.", uaEx);
-                throw;
             }
             catch (Exception ex)
             {

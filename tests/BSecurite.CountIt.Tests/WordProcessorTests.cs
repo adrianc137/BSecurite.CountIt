@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using BSecurite.CountIt.Abstractions;
 using BSecurite.CountIt.Services;
 using Microsoft.Extensions.Logging;
@@ -34,14 +35,50 @@ namespace BSecurite.CountIt.Tests
         }
 
         [Test]
-        public void WordCounter_WhenInputFileDoesntExist_ShouldThrowArgumentException()
+        public async Task WordCounter_WhenValidInput_CountsCorrectly()
         {
-            var inputFilePath = "invalidFilePath.txt";
-            Assert.That(() => _wordProcessor.ProcessFileContents(inputFilePath), 
-                Throws.InstanceOf<ArgumentException>()
-                    .With
-                    .Message
-                    .Contains("Provided input file path does not exist."));
+            var fileContents =
+                "The big brown fox number 4 jumped over the lazy dog. THE BIG BROWN FOX JUMPED OVER THE LAZY DOG. The Big Brown Fox 123";
+            _fileReaderMock.Setup(x => x.ReadContents(It.IsAny<string>()))
+                .ReturnsAsync(() => new [] { fileContents });
+
+            var wordsList = new List<string>
+            {
+                "the", "big", "brown", "fox", "number", "jumped", "over", "the", "lazy", "dog", "the", "big",
+                "brown", "fox", "jumped", "over", "the", "lazy", "dog", "the", "big", "brown", "fox",
+            };
+            _wordMatcherMock.Setup(x => x.ExtractWords(fileContents.ToLower()))
+                .Returns(() => wordsList);
+
+            var sortedWordsList = new List<string>
+            {
+                "big", "big", "big",
+                "brown", "brown", "brown",
+                "dog", "dog",
+                "fox", "fox", "fox",
+                "jumped", "jumped",
+                "lazy", "lazy",
+                "number",
+                "over", "over",
+                "the", "the", "the", "the", "the"
+            };
+            _wordSorterMock.Setup(x => x.SortWords(wordsList))
+                .Returns(sortedWordsList);
+
+            var expectedResult = new Dictionary<string, int>()
+            {
+                { "big", 3 },
+                { "brown", 3 },
+                { "dog", 2 },
+                { "fox", 3 },
+                { "jumped", 2 },
+                { "lazy", 2 },
+                { "number", 1 },
+                { "over", 2 },
+                { "the", 5 },
+            };
+
+            Assert.AreEqual(expectedResult, await _wordProcessor.ProcessFileContents("filePath"));
         }
     }
 }
