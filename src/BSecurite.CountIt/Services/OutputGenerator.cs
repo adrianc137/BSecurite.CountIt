@@ -6,7 +6,12 @@ namespace BSecurite.CountIt.Services
     {
         public void PrintResults(Dictionary<string, int> results)
         {
-            throw new NotImplementedException();
+            Console.WriteLine("Number of words: {0}", results.Values.Sum());
+
+            foreach (var entry in results)
+            {
+                Console.WriteLine("{0} {1}", entry.Key, entry.Value);
+            }
         }
     }
 }

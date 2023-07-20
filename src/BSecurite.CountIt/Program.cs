@@ -4,13 +4,22 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BSecurite.CountIt.Abstractions;
 using BSecurite.CountIt.Services;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
-HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddTransient<IFileReader, FileReader>();
+builder.Services.AddTransient<IWordMatcher, WordMatcher>();
+builder.Services.AddTransient<IWordSorter, WordSorter>();
+builder.Services.AddTransient<IWordProcessor, WordProcessor>();
+builder.Services.AddTransient<IOutputGenerator, OutputGenerator>();
 
-using IHost host = builder.Build();
+using var host = builder.Build();
+var config = host.Services.GetRequiredService<IConfiguration>();
 
-var fileReader = host.Services.GetRequiredService<IFileReader>();
+var wordProcessor = host.Services.GetRequiredService<IWordProcessor>();
+var results = await wordProcessor.ProcessFileContents(config.GetSection("InputFilePath").Value ?? string.Empty);
+
+var outputGenerator = host.Services.GetRequiredService<IOutputGenerator>();
+outputGenerator.PrintResults(results);
 
 await host.RunAsync();
