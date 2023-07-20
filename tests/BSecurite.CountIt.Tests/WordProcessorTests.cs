@@ -30,14 +30,18 @@ namespace BSecurite.CountIt.Tests
         public void WordCounter_WhenInputNotProvided_ShouldThrowArgumentException()
         {
             var inputFilePath = string.Empty;
-            Assert.Throws<ArgumentNullException>(() => _wordProcessor.ProcessFileContents(inputFilePath));
+            Assert.That(() => _wordProcessor.ProcessFileContents(inputFilePath), Throws.InstanceOf<ArgumentNullException>());
         }
 
-        //[Test]
-        //public void WordCounter_WhenInputFileDoesntExist_ShouldThrowArgumentException()
-        //{
-        //    var inputFilePath = "invalidFilePath.txt";
-        //    Assert.Catch(typeof(ArgumentException), () => _wordProcessor.ProcessFileContents(inputFilePath), "Provided input file does not exist.");
-        //}
+        [Test]
+        public void WordCounter_WhenInputFileDoesntExist_ShouldThrowArgumentException()
+        {
+            var inputFilePath = "invalidFilePath.txt";
+            Assert.That(() => _wordProcessor.ProcessFileContents(inputFilePath), 
+                Throws.InstanceOf<ArgumentException>()
+                    .With
+                    .Message
+                    .Contains("Provided input file path does not exist."));
+        }
     }
 }
