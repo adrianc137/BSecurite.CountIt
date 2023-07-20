@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using BSecurite.CountIt.Abstractions;
 using BSecurite.CountIt.Services;
 using Microsoft.Extensions.Logging;
@@ -45,7 +44,7 @@ namespace BSecurite.CountIt.Tests
             var wordsList = new List<string>
             {
                 "the", "big", "brown", "fox", "number", "jumped", "over", "the", "lazy", "dog", "the", "big",
-                "brown", "fox", "jumped", "over", "the", "lazy", "dog", "the", "big", "brown", "fox",
+                "brown", "fox", "jumped", "over", "the", "lazy", "dog", "the", "big", "brown", "fox"
             };
             _wordMatcherMock.Setup(x => x.ExtractWords(fileContents.ToLower()))
                 .Returns(() => wordsList);
@@ -76,6 +75,81 @@ namespace BSecurite.CountIt.Tests
                 { "number", 1 },
                 { "over", 2 },
                 { "the", 5 },
+            };
+
+            Assert.AreEqual(expectedResult, await _wordProcessor.ProcessFileContents("filePath"));
+        }
+
+        [Test]
+        public async Task WordCounter_WhenInputEmpty_CountsCorrectly()
+        {
+            var fileContents = "     ";
+            _fileReaderMock.Setup(x => x.ReadContents(It.IsAny<string>()))
+                .ReturnsAsync(() => new [] { fileContents });
+
+            var wordsList = new List<string>();
+            _wordMatcherMock.Setup(x => x.ExtractWords(fileContents.ToLower()))
+                .Returns(() => wordsList);
+            
+            _wordSorterMock.Setup(x => x.SortWords(wordsList))
+                .Returns(wordsList);
+
+            var expectedResult = new Dictionary<string, int>();
+
+            Assert.AreEqual(expectedResult, await _wordProcessor.ProcessFileContents("filePath"));
+        }
+
+        [Test]
+        public async Task WordCounter_WhenInputNumbers_CountsCorrectly()
+        {
+            var fileContents = "123123 1241 529291 888 333 1 1 1 1. 23 44 56 56 7.6.6 6. 6.6";
+            _fileReaderMock.Setup(x => x.ReadContents(It.IsAny<string>()))
+                .ReturnsAsync(() => new [] { fileContents });
+
+            _fileReaderMock.Setup(x => x.ReadContents(It.IsAny<string>()))
+                .ReturnsAsync(() => new [] { fileContents });
+
+            var wordsList = new List<string>();
+            _wordMatcherMock.Setup(x => x.ExtractWords(fileContents.ToLower()))
+                .Returns(() => wordsList);
+            
+            _wordSorterMock.Setup(x => x.SortWords(wordsList))
+                .Returns(wordsList);
+
+            var expectedResult = new Dictionary<string, int>();
+
+            Assert.AreEqual(expectedResult, await _wordProcessor.ProcessFileContents("filePath"));
+        }
+
+        [Test]
+        public async Task WordCounter_WhenInputRandomLetters_CountsCorrectly()
+        {
+            var fileContents = "h a o l e h a o t";
+            _fileReaderMock.Setup(x => x.ReadContents(It.IsAny<string>()))
+                .ReturnsAsync(() => new [] { fileContents });
+
+            var wordsList = new List<string>
+            {
+                "h", "a", "o", "l", "e", "h", "a", "o", "t"
+            };
+            _wordMatcherMock.Setup(x => x.ExtractWords(fileContents.ToLower()))
+                .Returns(() => wordsList);
+
+            var sortedWordsList = new List<string>
+            {
+                "a", "a", "e", "h", "h", "l", "o", "o", "t"
+            };
+            _wordSorterMock.Setup(x => x.SortWords(wordsList))
+                .Returns(sortedWordsList);
+
+            var expectedResult = new Dictionary<string, int>
+            {
+                { "a", 2 },
+                { "e", 1 },
+                { "h", 2 },
+                { "l", 1 },
+                { "o", 2 },
+                { "t", 1 }
             };
 
             Assert.AreEqual(expectedResult, await _wordProcessor.ProcessFileContents("filePath"));
